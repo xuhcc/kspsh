@@ -1,4 +1,7 @@
 kspsh
 =====
 
-Generating sounds with Python 3
+Requirements:
+* numpy
+* tk
+* Pillow
