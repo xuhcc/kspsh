@@ -10,6 +10,11 @@ import numpy
 class Audio(object):
 
     def __init__(self, audio_data, sample_rate):
+        """
+        Accepts:
+            audio_data: audio data (single channel) as numpy array
+            sample_rate: integer
+        """
         self._data = audio_data
         self.sample_rate = sample_rate
 
@@ -43,32 +48,27 @@ class Audio(object):
             '-f', 's16le',  # raw 16-bit
             '-acodec', 'pcm_s16le',
             '-ar', str(sample_rate),
-            '-ac', '2',  # stereo
+            '-ac', '1',  # mono
             '-',  # pipe
         ]
         pipe = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=10**8)
         data = numpy.fromstring(pipe.stdout.read(), dtype="int16")
         pipe.terminate()
-        # Split channels
-        data = data.reshape((len(data) / 2, 2))
+        # Normalize
+        data = numpy.float32(data) / numpy.abs(data).max()
         return cls(data, sample_rate)
 
-    def get_spectrum(self, p1, p2):
+    def get_spectrum(self, pos_1, pos_2):
         """
         Calculate frequency spectrum
         Accepts:
-            p1: starting position
-            p2: ending position
+            pos_1: starting position
+            pos_2: ending position
         """
-        size = p2 - p1
-        sound = numpy.zeros(size, dtype=float)
-        # Combine channels
-        for i, sample in enumerate(self._data[p1:p2]):
-            l = int(sample[0])
-            r = int(sample[1])
-            sound[i] = (l + r) / 2
+        size = pos_2 - pos_1
         # Calculate FFT
-        tf = numpy.abs(numpy.fft.fft(sound))[:size // 2]
+        tf = numpy.fft.fft(self._data[pos_1:pos_2])
+        tf = numpy.abs(tf)[:size // 2]
         # Normalize
         tf = tf / (tf.max() or 1)
         return tf
