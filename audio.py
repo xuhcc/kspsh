@@ -67,8 +67,8 @@ class Audio(object):
         """
         size = pos_2 - pos_1
         # Calculate FFT
-        tf = numpy.fft.fft(self._data[pos_1:pos_2])
-        tf = numpy.abs(tf)[:size // 2]
+        tf = numpy.fft.rfft(self._data[pos_1:pos_2], n=size)
+        tf = numpy.abs(tf)
         # Normalize
         tf = tf / (tf.max() or 1)
         return tf
