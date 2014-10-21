@@ -4,7 +4,7 @@ import multiprocessing
 import numpy
 from PIL import Image
 
-from audio import Audio
+from vis.audio import Audio
 
 
 class Visualizer(multiprocessing.Process):

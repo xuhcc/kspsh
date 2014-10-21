@@ -1,4 +1,3 @@
-import argparse
 import multiprocessing
 import queue
 import time
@@ -6,8 +5,8 @@ import tkinter as tk
 
 from PIL import ImageTk
 
-from audio import Player
-from graphics import Visualizer
+from vis.audio import Player
+from vis.graphics import Visualizer
 
 
 class Application(object):
@@ -72,15 +71,3 @@ class Application(object):
     def quit(self):
         self.stop()
         self.root.destroy()
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", type=argparse.FileType('r'))
-    args = parser.parse_args()
-    app = Application(args.input)
-    app.start()
-
-
-if __name__ == "__main__":
-    main()
