@@ -19,7 +19,7 @@ class Visualizer(multiprocessing.Process):
         self.height = height
         self.chunk_size = self.audio.get_chunk_size(delay)
         self.block_size = 2 ** math.ceil(math.log2(self.chunk_size))
-        self.color = code_to_rgb256('#5F00FF')
+        self.color = code_to_rgb256('#C1FF8B')
 
     def run(self):
         for pos in range(0, len(self.audio), self.chunk_size):

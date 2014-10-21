@@ -68,9 +68,8 @@ class Audio(object):
         size = pos_2 - pos_1
         # Calculate FFT
         tf = numpy.fft.rfft(self._data[pos_1:pos_2], n=size)
-        tf = numpy.abs(tf)
-        # Normalize
-        tf = tf / (tf.max() or 1)
+        # Get magnitude spectrum
+        tf = numpy.log(numpy.abs(tf) + 1) / numpy.log(size / 2)
         return tf
 
 
