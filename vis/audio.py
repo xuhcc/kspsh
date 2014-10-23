@@ -77,13 +77,16 @@ class AudioFile(object):
         Accepts:
             chunk_length: chunk length, seconds
         Yields:
+            current_time: float
             spectrum: numpy array
         """
         chunk_size = math.ceil(chunk_length * self.sample_rate)
         block_size = 2 ** math.ceil(math.log2(chunk_size))  # FFT size
+        current_time = 0
         for pos in range(0, len(self._data), chunk_size):
             spectrum = get_spectrum(self._data[pos:pos + block_size])
-            yield spectrum
+            current_time += chunk_length
+            yield current_time, spectrum
 
 
 class Player(threading.Thread):

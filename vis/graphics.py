@@ -22,7 +22,7 @@ class Visualizer(multiprocessing.Process):
 
     def run(self):
         logger.info('visualizer started')
-        for spectrum in self.generator:
+        for current_time, spectrum in self.generator:
             # Plot spectrum
             block_size = len(spectrum)
             mtx = numpy.zeros((self.width, self.height, 3),
@@ -32,7 +32,7 @@ class Visualizer(multiprocessing.Process):
                 y = math.floor(spectrum[i // 2] * (self.height - 1))
                 mtx[x, y] = self.color
             image = Image.fromarray(numpy.rot90(mtx), 'RGB')
-            self.queue.put(image)
+            self.queue.put((current_time, image))
 
 
 def code_to_rgb256(code):

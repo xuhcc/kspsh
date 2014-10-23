@@ -50,23 +50,21 @@ class Application(object):
         """
         Display one image per call
         """
-        start_time = time.time()
-        try:
-            image = self.queue.get_nowait()
-        except queue.Empty:
-            pass
-        else:
-            # Draw image
-            self.image = ImageTk.PhotoImage(image=image)
-            self.canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
+        current_time, image = self.queue.get()
+        # Draw image
+        self.image = ImageTk.PhotoImage(image=image)
+        self.canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
         if self.visualizer.is_alive() or not self.queue.empty():
             # Repeat
-            delay = max(self.delay - (time.time() - start_time), 0)
+            delay = max(current_time - (time.time() - self.start_time), 0)
             self.root.after(int(delay * 1000), self.draw_image)
+        else:
+            logger.info('visualization finished')
 
     def start(self):
         self.visualizer.start()
         self.player.start()
+        self.start_time = time.time()
         self.draw_image()
         self.root.mainloop()
 
