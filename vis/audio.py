@@ -58,7 +58,10 @@ class AudioFile(object):
             '-ac', '1',  # mono
             '-',  # pipe
         ]
-        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=10**8)
+        pipe = subprocess.Popen(command,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.DEVNULL,
+                                bufsize=10**8)
         data = numpy.fromstring(pipe.stdout.read(), dtype="int16")
         pipe.terminate()
         # Normalize
@@ -90,7 +93,9 @@ class Player(threading.Thread):
 
     def run(self):
         path = os.path.abspath(self.audio_file.name)
-        proc = subprocess.Popen(['ffplay', '-i', path])
+        proc = subprocess.Popen(['ffplay', '-i', path],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
         while proc.poll() is None:
             if self._stop_event.is_set():
                 proc.terminate()
