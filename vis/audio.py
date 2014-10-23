@@ -5,6 +5,7 @@ import subprocess
 import threading
 import time
 
+import alsaaudio
 import numpy
 
 logger = logging.getLogger(__name__)
@@ -68,8 +69,7 @@ class AudioFile(object):
                                 bufsize=10**8)
         data = numpy.fromstring(pipe.stdout.read(), dtype="int16")
         pipe.terminate()
-        # Normalize
-        data = numpy.float32(data) / numpy.abs(data).max()
+        data = numpy.float16(data) / 32768
         return cls(data, sample_rate)
 
     def spectrum_generator(self, chunk_length):
@@ -113,3 +113,45 @@ class Player(threading.Thread):
 
     def stop(self):
         self._stop_event.set()
+
+
+class Recorder(object):
+    """
+    Captures audio
+    """
+    def __init__(self, card="sysdefault:CARD=PCH", sample_rate=44100):
+        self._data = numpy.array([], dtype="float16")
+        self.sample_rate = sample_rate
+        self.source = alsaaudio.PCM(alsaaudio.PCM_CAPTURE,
+                                    alsaaudio.PCM_NORMAL,
+                                    card)
+        self.source.setchannels(1)  # Mono
+        self.source.setrate(sample_rate)
+        self.source.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+        logger.info('recorder initialized')
+
+    def spectrum_generator(self, chunk_length):
+        """
+        Accepts:
+            chunk_length: chunk length, seconds
+        Yields:
+            current_time: float
+            spectrum: numpy array
+        """
+        chunk_size = math.ceil(chunk_length * self.sample_rate)
+        block_size = 2 ** math.ceil(math.log2(chunk_size))  # FFT size
+        start_time = time.time()
+        pos = 0
+        while True:
+            # Read audio data from device
+            length, raw_data = self.source.read()
+            if length <= 0:
+                continue
+            data = numpy.fromstring(raw_data, dtype="int16")
+            data = numpy.float16(data) / 32768
+            self._data = numpy.append(self._data, data)
+            if len(self._data) >= pos + block_size:
+                spectrum = get_spectrum(self._data[pos:pos + block_size])
+                pos += block_size
+                current_time = time.time() - start_time + chunk_length * 1.5
+                yield current_time, spectrum

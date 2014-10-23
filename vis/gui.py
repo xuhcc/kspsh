@@ -6,7 +6,7 @@ import tkinter as tk
 
 from PIL import ImageTk
 
-from vis.audio import AudioFile, Player
+from vis.audio import AudioFile, Player, Recorder
 from vis.graphics import Visualizer
 
 logger = logging.getLogger(__name__)
@@ -37,13 +37,17 @@ class Application(object):
         self.delay = 1 / fps
         self.queue = multiprocessing.Queue(maxsize=16)
         if input_file:
+            source = AudioFile.read(input_file)
             self.player = Player(input_file)
-            self.visualizer = Visualizer(
-                self.queue,
-                AudioFile.read(input_file),
-                width,
-                height,
-                self.delay)
+        else:
+            source = Recorder()
+            self.player = None
+        self.visualizer = Visualizer(
+            self.queue,
+            source,
+            width,
+            height,
+            self.delay)
         logger.info('GUI initialized')
 
     def draw_image(self):
@@ -63,13 +67,15 @@ class Application(object):
 
     def start(self):
         self.visualizer.start()
-        self.player.start()
+        if self.player:
+            self.player.start()
         self.start_time = time.time()
         self.draw_image()
         self.root.mainloop()
 
     def stop(self):
-        self.player.stop()
+        if self.player:
+            self.player.stop()
 
     def quit(self):
         self.stop()
