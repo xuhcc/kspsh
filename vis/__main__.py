@@ -9,7 +9,10 @@ from vis import gui
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", type=argparse.FileType('r'))
+    parser.add_argument(
+        "-i", "--input",
+        type=argparse.FileType('r'),
+        help="specify the input file (default: use capture device)")
     args = parser.parse_args()
     app = gui.Application(args.input)
     app.start()

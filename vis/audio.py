@@ -7,7 +7,7 @@ import time
 import numpy
 
 
-class Audio(object):
+class AudioFile(object):
 
     def __init__(self, audio_data, sample_rate):
         """
@@ -25,13 +25,6 @@ class Audio(object):
     def duration(self):
         seconds = len(self._data) / self.sample_rate
         return seconds
-
-    def get_chunk_size(self, length):
-        """
-        Accepts:
-            length: chunk length, seconds
-        """
-        return math.ceil(length * self.sample_rate)
 
     @classmethod
     def read(cls, audio_file, sample_rate=44100):
@@ -71,6 +64,19 @@ class Audio(object):
         # Get magnitude spectrum
         tf = numpy.log(numpy.abs(tf) + 1) / numpy.log(size / 2)
         return tf
+
+    def spectrum_generator(self, chunk_length):
+        """
+        Accepts:
+            chunk_length: chunk length, seconds
+        Yields:
+            spectrum: numpy array
+        """
+        chunk_size = math.ceil(chunk_length * self.sample_rate)
+        block_size = 2 ** math.ceil(math.log2(chunk_size))  # FFT size
+        for pos in range(0, len(self._data), chunk_size):
+            spectrum = self.get_spectrum(pos, pos + block_size)
+            yield spectrum
 
 
 class Player(threading.Thread):

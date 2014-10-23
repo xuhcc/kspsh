@@ -5,13 +5,13 @@ import tkinter as tk
 
 from PIL import ImageTk
 
-from vis.audio import Player
+from vis.audio import AudioFile, Player
 from vis.graphics import Visualizer
 
 
 class Application(object):
 
-    def __init__(self, audio_file, width=800, height=600, fps=25):
+    def __init__(self, input_file, width=800, height=600, fps=25):
         # Prepare window and elements
         self.root = tk.Tk()
         self.root.geometry("{w}x{h}+{ox}+{oy}".format(
@@ -31,15 +31,16 @@ class Application(object):
         # The application must keep a reference to the image object
         self.image = None
         # Set up workers
-        self.player = Player(audio_file)
-        self.queue = multiprocessing.Queue(maxsize=16)
         self.delay = 1 / fps
-        self.visualizer = Visualizer(
-            self.queue,
-            audio_file,
-            width,
-            height,
-            self.delay)
+        self.queue = multiprocessing.Queue(maxsize=16)
+        if input_file:
+            self.player = Player(input_file)
+            self.visualizer = Visualizer(
+                self.queue,
+                AudioFile.read(input_file),
+                width,
+                height,
+                self.delay)
 
     def draw_image(self):
         """
