@@ -7,6 +7,20 @@ import time
 import numpy
 
 
+def get_spectrum(signal):
+    """
+    Calculate frequency spectrum
+    Accepts:
+        signal: numpy array
+    """
+    size = len(signal)
+    # Calculate FFT
+    tf = numpy.fft.rfft(signal, n=size)
+    # Get magnitude spectrum
+    tf = numpy.log(numpy.abs(tf) + 1) / numpy.log(size / 2)
+    return tf
+
+
 class AudioFile(object):
 
     def __init__(self, audio_data, sample_rate):
@@ -51,20 +65,6 @@ class AudioFile(object):
         data = numpy.float32(data) / numpy.abs(data).max()
         return cls(data, sample_rate)
 
-    def get_spectrum(self, pos_1, pos_2):
-        """
-        Calculate frequency spectrum
-        Accepts:
-            pos_1: starting position
-            pos_2: ending position
-        """
-        size = pos_2 - pos_1
-        # Calculate FFT
-        tf = numpy.fft.rfft(self._data[pos_1:pos_2], n=size)
-        # Get magnitude spectrum
-        tf = numpy.log(numpy.abs(tf) + 1) / numpy.log(size / 2)
-        return tf
-
     def spectrum_generator(self, chunk_length):
         """
         Accepts:
@@ -75,7 +75,7 @@ class AudioFile(object):
         chunk_size = math.ceil(chunk_length * self.sample_rate)
         block_size = 2 ** math.ceil(math.log2(chunk_size))  # FFT size
         for pos in range(0, len(self._data), chunk_size):
-            spectrum = self.get_spectrum(pos, pos + block_size)
+            spectrum = get_spectrum(self._data[pos:pos + block_size])
             yield spectrum
 
 
