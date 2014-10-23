@@ -1,8 +1,11 @@
+import logging
 import math
 import multiprocessing
 
 import numpy
 from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 
 class Visualizer(multiprocessing.Process):
@@ -18,6 +21,7 @@ class Visualizer(multiprocessing.Process):
         self.color = code_to_rgb256('#C1FF8B')
 
     def run(self):
+        logger.info('visualizer started')
         for spectrum in self.generator:
             # Plot spectrum
             block_size = len(spectrum)

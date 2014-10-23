@@ -1,3 +1,4 @@
+import logging
 import math
 import os
 import subprocess
@@ -5,6 +6,8 @@ import threading
 import time
 
 import numpy
+
+logger = logging.getLogger(__name__)
 
 
 def get_spectrum(signal):
@@ -31,6 +34,7 @@ class AudioFile(object):
         """
         self._data = audio_data
         self.sample_rate = sample_rate
+        logger.info('audio file loaded, {0:.2f}s'.format(self.duration))
 
     def __len__(self):
         return len(self._data)
@@ -96,11 +100,13 @@ class Player(threading.Thread):
         proc = subprocess.Popen(['ffplay', '-i', path],
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
+        logger.info('player started')
         while proc.poll() is None:
             if self._stop_event.is_set():
                 proc.terminate()
                 break
             time.sleep(0.1)
+        logger.info('player stopped')
 
     def stop(self):
         self._stop_event.set()

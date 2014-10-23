@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 import queue
 import time
@@ -7,6 +8,8 @@ from PIL import ImageTk
 
 from vis.audio import AudioFile, Player
 from vis.graphics import Visualizer
+
+logger = logging.getLogger(__name__)
 
 
 class Application(object):
@@ -41,6 +44,7 @@ class Application(object):
                 width,
                 height,
                 self.delay)
+        logger.info('GUI initialized')
 
     def draw_image(self):
         """
