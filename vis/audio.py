@@ -19,10 +19,12 @@ def get_spectrum(signal):
     """
     size = len(signal)
     # Calculate FFT
-    tf = numpy.fft.rfft(signal, n=size)
+    trf = numpy.fft.rfft(signal, n=size)
     # Get magnitude spectrum
-    tf = numpy.log(numpy.abs(tf) + 1) / numpy.log(size / 2)
-    return tf
+    spc = numpy.log(numpy.abs(trf) + 1)
+    # Normalize
+    spc = numpy.clip(spc / numpy.log(size / 2), 0, 1)
+    return spc
 
 
 class AudioFile(object):

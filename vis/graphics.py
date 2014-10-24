@@ -24,13 +24,13 @@ class Visualizer(multiprocessing.Process):
         logger.info('visualizer started')
         for current_time, spectrum in self.generator:
             # Plot spectrum
-            block_size = len(spectrum)
             mtx = numpy.zeros((self.width, self.height, 3),
                               dtype=numpy.uint8)
-            for i in range(block_size):
-                x = math.floor(i * self.width / block_size)
-                y = math.floor(spectrum[i // 2] * (self.height - 1))
-                mtx[x, y] = value_to_rgb256(current_time + i / block_size)
+            spec_size = len(spectrum)
+            for idx in range(spec_size):
+                x = math.floor(idx * self.width / spec_size)
+                y = math.floor(spectrum[idx] * (self.height - 1))
+                mtx[x, y] = value_to_rgb256(current_time + idx / spec_size)
             image = Image.fromarray(numpy.rot90(mtx), 'RGB')
             self.queue.put((current_time, image))
 
