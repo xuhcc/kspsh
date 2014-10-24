@@ -26,13 +26,31 @@ class Visualizer(multiprocessing.Process):
             # Plot spectrum
             mtx = numpy.zeros((self.width, self.height, 3),
                               dtype=numpy.uint8)
-            spec_size = len(spectrum)
-            for idx in range(spec_size):
-                x = math.floor(idx * self.width / spec_size)
-                y = math.floor(spectrum[idx] * (self.height - 1))
-                mtx[x, y] = value_to_rgb256(current_time + idx / spec_size)
+            for x, y, color in self.plot_polar(current_time, spectrum):
+                mtx[x, y] = color
             image = Image.fromarray(numpy.rot90(mtx), 'RGB')
             self.queue.put((current_time, image))
+
+    def plot_simple(self, current_time, spectrum):
+        spec_size = len(spectrum)
+        for idx in range(spec_size):
+            x = math.floor(idx * self.width / spec_size)
+            y = math.floor(spectrum[idx] * (self.height - 1))
+            c = value_to_rgb256(current_time + idx / spec_size)
+            yield x, y, c
+
+    def plot_polar(self, current_time, spectrum):
+        spec_size = len(spectrum)
+        for idx in range(spec_size):
+            r = spectrum[idx] * self.height / 2
+            a = math.pi * (2 * idx / spec_size - 0.5)
+            x = math.floor(r * math.cos(a) + self.width / 2)
+            y = math.floor(r * math.sin(a) + self.height / 2)
+            c = value_to_rgb256(current_time + idx / spec_size)
+            yield x, y, c
+            x = self.width - x
+            y =  self.height - y
+            yield x, y, c
 
 
 def code_to_rgb256(code):
