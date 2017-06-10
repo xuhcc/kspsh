@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Application(object):
 
-    def __init__(self, input_file, width=800, height=600, fps=25):
+    def __init__(self, input_file, width=1000, height=800, fps=25):
         # Prepare window and elements
         self.root = tk.Tk()
         self.root.geometry("{w}x{h}+{ox}+{oy}".format(
